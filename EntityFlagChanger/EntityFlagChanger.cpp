@@ -1,7 +1,5 @@
 // ReSharper disable CppClangTidyPerformanceNoIntToPtr
 // ReSharper disable CppInconsistentNaming
-// ReSharper disable CppClangTidyBugproneNarrowingConversions
-// ReSharper disable CppClangTidyClangDiagnosticFloatConversion
 #include <Windows.h>
 #include <cstdint>
 
@@ -61,6 +59,54 @@ static int SetEntityOpaque(lua_State* L)
 	return 1;
 }
 
+static int IsNameHidden(lua_State* L)
+{
+	const auto idx = LuaCoreWrapper::oLuaL_CheckInteger(L, 1);
+
+	if (const auto actor = GetActorByIdx(idx))
+	{
+		const auto nameHideFlag = *reinterpret_cast<byte*>(actor + NameHideFlagOffset);
+		LuaCoreWrapper::oLua_PushBoolean(L, ((nameHideFlag >> 7) & 1) > 0);
+		return 1;
+	}
+
+	return 1;
+}
+
+static int HideEntityName(lua_State* L)
+{
+	const auto idx = LuaCoreWrapper::oLuaL_CheckInteger(L, 1);
+
+	if (const auto actor = GetActorByIdx(idx))
+	{
+		auto nameHideFlag = *reinterpret_cast<byte*>(actor + NameHideFlagOffset);
+		nameHideFlag |= 1 << 7;
+		*reinterpret_cast<byte*>(actor + NameHideFlagOffset) = nameHideFlag;
+		LuaCoreWrapper::oLua_PushNumber(L, 1);
+		return 1;
+	}
+
+	LuaCoreWrapper::oLua_PushNumber(L, -1);
+	return 1;
+}
+
+static int ShowEntityName(lua_State* L)
+{
+	const auto idx = LuaCoreWrapper::oLuaL_CheckInteger(L, 1);
+
+	if (const auto actor = GetActorByIdx(idx))
+	{
+		auto nameHideFlag = *reinterpret_cast<byte*>(actor + NameHideFlagOffset);
+		nameHideFlag &= ~(1 << 7);
+		*reinterpret_cast<byte*>(actor + NameHideFlagOffset) = nameHideFlag;
+		LuaCoreWrapper::oLua_PushNumber(L, 1);
+		return 1;
+	}
+
+	LuaCoreWrapper::oLua_PushNumber(L, -1);
+	return 1;
+}
+
 static int IsEntityInvisible(lua_State* L)
 {
 	const auto idx = LuaCoreWrapper::oLuaL_CheckInteger(L, 1);
@@ -99,58 +145,13 @@ static int SetEntityInvisible(lua_State* L)
 
 	if(const auto actor = GetActorByIdx(idx))
 	{
+		//must clear both of these flags for invisible flag to apply
+		SetEntityOpaque(L);
+		ShowEntityName(L);
 		auto invisibleFlag = *reinterpret_cast<byte*>(actor + InvisibleFlagOffset);
 		invisibleFlag |= 1 << 6;
 		//invisibleFlag |= 1 << 7; game sets both but setting 7th bit sets 8th one and unsetting 7th bit unsets 8th one so don't really need to set/unset both
 		*reinterpret_cast<byte*>(actor + InvisibleFlagOffset) = invisibleFlag;
-		LuaCoreWrapper::oLua_PushNumber(L, 1);
-		return 1;
-	}
-	
-	LuaCoreWrapper::oLua_PushNumber(L, -1);
-	return 1;
-}
-
-static int IsNameHidden(lua_State* L)
-{
-	const auto idx = LuaCoreWrapper::oLuaL_CheckInteger(L, 1);
-
-	if (const auto actor = GetActorByIdx(idx))
-	{
-		const auto nameHideFlag = *reinterpret_cast<byte*>(actor + NameHideFlagOffset);
-		LuaCoreWrapper::oLua_PushBoolean(L, ((nameHideFlag >> 7) & 1) > 0);
-		return 1;
-	}
-	
-	return 1;
-}
-
-static int HideEntityName(lua_State* L)
-{
-	const auto idx = LuaCoreWrapper::oLuaL_CheckInteger(L, 1);
-
-	if (const auto actor = GetActorByIdx(idx))
-	{
-		auto nameHideFlag = *reinterpret_cast<byte*>(actor + NameHideFlagOffset);
-		nameHideFlag |= 1 << 7;
-		*reinterpret_cast<byte*>(actor + NameHideFlagOffset) = nameHideFlag;
-		LuaCoreWrapper::oLua_PushNumber(L, 1);
-		return 1;
-	}
-	
-	LuaCoreWrapper::oLua_PushNumber(L, -1);
-	return 1;
-}
-
-static int ShowEntityName(lua_State* L)
-{
-	const auto idx = LuaCoreWrapper::oLuaL_CheckInteger(L, 1);
-
-	if(const auto actor = GetActorByIdx(idx))
-	{
-		auto nameHideFlag = *reinterpret_cast<byte*>(actor + NameHideFlagOffset);
-		nameHideFlag &= ~(1 << 7);
-		*reinterpret_cast<byte*>(actor + NameHideFlagOffset) = nameHideFlag;
 		LuaCoreWrapper::oLua_PushNumber(L, 1);
 		return 1;
 	}
