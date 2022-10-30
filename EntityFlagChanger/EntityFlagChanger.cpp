@@ -68,7 +68,7 @@ static int IsEntityInvisible(lua_State* L)
 	if (const auto actor = GetActorByIdx(idx))
 	{
 		const auto invisFlag = *reinterpret_cast<byte*>(actor + InvisibleFlagOffset);
-		LuaCoreWrapper::oLua_PushBoolean(L, (invisFlag >> 6) > 0 || (invisFlag >> 7) > 0);
+		LuaCoreWrapper::oLua_PushBoolean(L, ((invisFlag >> 6) & 1) > 0 || ((invisFlag >> 7) & 1) > 0);
 		return 1;
 	}
 	
