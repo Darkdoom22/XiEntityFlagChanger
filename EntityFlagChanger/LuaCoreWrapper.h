@@ -21,7 +21,7 @@ namespace LuaCoreWrapper
 	const fnLuaL_PushBoolean oLua_PushBoolean = reinterpret_cast<fnLuaL_PushBoolean>(
 		GetProcAddress(LuaCore, "lua_pushboolean"));
 
-	using fnLuaL_CheckInteger = lua_Number(_cdecl*)(lua_State*, int);
+	using fnLuaL_CheckInteger = lua_Integer(_cdecl*)(lua_State*, int);
 	const fnLuaL_CheckInteger oLuaL_CheckInteger = reinterpret_cast<fnLuaL_CheckInteger>(
-		GetProcAddress(LuaCore, "luaL_checknumber"));
+		GetProcAddress(LuaCore, "luaL_checkinteger"));
 }

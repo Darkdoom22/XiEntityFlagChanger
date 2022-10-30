@@ -19,7 +19,7 @@ using fnGetActorByIdx = uintptr_t(__cdecl*)(uint32_t param_1);
 const fnGetActorByIdx oGetActorByIdx = reinterpret_cast<fnGetActorByIdx>(
 	FindPattern::ScanModIn((char*)ActorByIdxPattern, (char*)ActorByIdxMask, "FFXiMain.dll"));
 
-uintptr_t GetActorByIdx(uint32_t idx)
+uintptr_t GetActorByIdx(const uint32_t idx)
 {
 	if (!oGetActorByIdx)
 		return 0;
